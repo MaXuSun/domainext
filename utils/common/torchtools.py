@@ -21,7 +21,8 @@ __all__ = [
     "count_num_param",
     "load_pretrained_weights",
     "init_network_weights",
-    'set_requires_grad',
+    "set_requires_grad",
+    "send_to_device"
 ]
 
 
@@ -362,3 +363,24 @@ def set_requires_grad(net, requires_grad=False):
     """
     for param in net.parameters():
         param.requires_grad = requires_grad
+
+def send_to_device(tensor, device):
+    """
+    Recursively sends the elements in a nested list/tuple/dictionary of tensors to a given device.
+
+    Args:
+        tensor (nested list/tuple/dictionary of :obj:`torch.Tensor`):
+            The data to send to a given device.
+        device (:obj:`torch.device`):
+            The device to send the data to
+
+    Returns:
+        The same data structure as :obj:`tensor` with all tensors sent to the proper device.
+    """
+    if isinstance(tensor, (list, tuple)):
+        return type(tensor)(send_to_device(t, device) for t in tensor)
+    elif isinstance(tensor, dict):
+        return type(tensor)({k: send_to_device(v, device) for k, v in tensor.items()})
+    elif not hasattr(tensor, "to"):
+        return tensor
+    return tensor.to(device)

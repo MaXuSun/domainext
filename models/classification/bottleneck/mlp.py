@@ -21,14 +21,14 @@ class MLP(nn.Module):
         assert len(hidden_layers) > 0
         self.out_features = hidden_layers[-1]
 
-        mlp = []
-
         if activation == "relu":
             act_fn = functools.partial(nn.ReLU, inplace=True)
         elif activation == "leaky_relu":
             act_fn = functools.partial(nn.LeakyReLU, inplace=True)
         else:
             raise NotImplementedError
+        
+        mlp = []
 
         for hidden_dim in hidden_layers:
             mlp += [nn.Linear(in_features, hidden_dim)]
