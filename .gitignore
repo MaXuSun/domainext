@@ -134,4 +134,7 @@ dmypy.json
 .Trashes
 ._*
 
+#  this project
 main.py
+examples/main.py
+docs/
