@@ -188,9 +188,9 @@ def check_availability(requested, available):
             "(do you mean [{}]?)".format(available, requested, psb_ans)
         )
 
-
 def tolist_if_not(x):
     """Convert to a list."""
     if not isinstance(x, list):
         x = [x]
     return x
+
