@@ -1,4 +1,20 @@
-from dassl.utils import Registry, check_availability
+"""
+@author: Xu Ma
+@email: maxu@zju.edu.cn
+"""
+
+from .registry import Registry, check_availability
+
+__all__ = [
+    'build_network',
+    'build_backbone',
+    'build_bottleneck',
+    'build_encoder',
+    'build_decoder',
+    'build_trainer',
+    'build_evaluator',
+    'build_dataset'
+]
 
 ##################
 ###  1. model  ###

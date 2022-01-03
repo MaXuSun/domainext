@@ -5,6 +5,12 @@ import tarfile
 import zipfile
 import gdown
 
+__all__ = [
+    'LableDatum',
+    'FullDatum',
+    'ClassDatasetBase',
+    'SegDatasetBase'
+]
 #############
 ### Datum ###
 #############

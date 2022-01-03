@@ -3,6 +3,10 @@ from .random_domain import RandomDomainSampler
 from .seq_domain import SeqDomainSampler
 from torch.utils.data.sampler import RandomSampler, SequentialSampler
 
+__all__ = [
+    "build_sampler"
+]
+
 def build_sampler(
     sampler_type,
     cfg=None,

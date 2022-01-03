@@ -1,7 +1,20 @@
+"""
+@author: Xu Ma
+@email: maxu@zju.edu.cn
+"""
+
 from .torchtools import send_to_device
 from torch.utils.data import DataLoader
 from collections import defaultdict
 import random
+
+__all__ = [
+    'ForeverDataIterator',
+    'split_dataset_by_domain',
+    'split_dataset_by_label',
+    'generate_fewshot_dataset',
+    'show_dataset_summary'
+]
 
 class ForeverDataIterator:
     r"""A data iterator that will never stop producing data"""
@@ -95,3 +108,25 @@ def generate_fewshot_dataset(*data_sources, num_shots=-1, repeat=False):
         return output[0]
 
     return output
+
+def show_dataset_summary(cfg, dataset):
+        print("***** Dataset statistics *****")
+
+        print("  Dataset: {}".format(cfg.DATASET.NAME))
+
+        if cfg.DATASET.SOURCE_DOMAINS:
+            print("  Source domains: {}".format(cfg.DATASET.SOURCE_DOMAINS))
+        if cfg.DATASET.TARGET_DOMAINS:
+            print("  Target domains: {}".format(cfg.DATASET.TARGET_DOMAINS))
+
+        print("  # classes: {:,}".format(dataset.num_classes))
+
+        print("  # train_x: {:,}".format(len(dataset.train_x)))
+
+        if dataset.train_u:
+            print("  # train_u: {:,}".format(len(dataset.train_u)))
+
+        if dataset.val:
+            print("  # val: {:,}".format(len(dataset.val)))
+
+        print("  # test: {:,}".format(len(dataset.test)))
