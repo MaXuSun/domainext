@@ -25,6 +25,8 @@ def _build_data_loader(
     n_domain=0,
     n_ins=2,
 ):
+    if wrapper is None:
+        return None
     sampler = build_sampler(sampler_type,cfg,wrapper.data,batch_size,n_domain,n_ins)
 
     data_loader = DataLoader(wrapper,batch_size=batch_size,sampler=sampler,
@@ -36,6 +38,7 @@ def _build_data_loader(
     return data_loader
 
 def build_train_loader_x(cfg,wrapper_x):
+    assert wrapper_x is not None
     sampler_type=cfg.DATALOADER.TRAIN_X.SAMPLER
     batch_size=cfg.DATALOADER.TRAIN_X.BATCH_SIZE
     n_domain=cfg.DATALOADER.TRAIN_X.N_DOMAIN

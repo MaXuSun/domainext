@@ -45,6 +45,8 @@ class BaseMlpNet(BaseNet):
         super().__init__(cfg, model_cfg, num_classes, **kwargs)
     
     def build_bottleneck(self,cfg,model_cfg,**kwargs):
+        assert cfg.BOTTLENECK.NAME == 'mlp'
+
         if model_cfg.BOTTLENECK.NAME and model_cfg.BOTTLENECK.HIDDEN_LAYERS:
             return build_bottleneck(
                 model_cfg.BOTTLENECK.NAME,

@@ -4,6 +4,7 @@
 """
 
 from .registry import Registry, check_availability
+from .data import show_dataset_summary
 
 __all__ = [
     'build_network',
@@ -97,9 +98,12 @@ def build_evaluator(cfg, **kwargs):
 
 """Dataset Registry"""
 DATASET_REGISTRY = Registry("DATASET")
-def build_dataset(cfg):
+def build_dataset(cfg,show_data=False):
     avai_datasets = DATASET_REGISTRY.registered_names()
     check_availability(cfg.DATASET.NAME, avai_datasets)
     if cfg.VERBOSE:
         print("Loading dataset: {}".format(cfg.DATASET.NAME))
-    return DATASET_REGISTRY.get(cfg.DATASET.NAME)(cfg)
+    dataset = DATASET_REGISTRY.get(cfg.DATASET.NAME)(cfg)
+    if show_data:
+        show_dataset_summary(cfg,dataset)
+    return dataset
