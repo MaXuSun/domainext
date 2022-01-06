@@ -62,8 +62,8 @@ def build_test_loader(cfg,wrapper_test):
 def build_val_loader(cfg,wrapper_val):
     return build_test_loader(cfg,wrapper_val)
 
-def fast_build_test_loader(wrapper):
-    data_loader = DataLoader(wrapper,batch_size=100,shuffle=False,num_workers=4,drop_last=False,pin_memory=True)
+def fast_build_test_loader(wrapper,num_workers=1,bs=100):
+    data_loader = DataLoader(wrapper,batch_size=bs,shuffle=False,num_workers=num_workers,drop_last=False)
     return data_loader
 
 def build_all_loader(cfg,wrapper_x,wrapper_test,wrapper_u=None,wrapper_val=None):

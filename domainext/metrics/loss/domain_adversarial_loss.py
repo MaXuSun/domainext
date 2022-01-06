@@ -14,7 +14,7 @@ from typing import Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from domainext.models.classification.network.grl import WarmStartGradientReverseLayer
+from domainext.models.classification.grl import WarmStartGradientReverseLayer
 from ..accuracy import binary_accuracy
 
 class DomainAdversarialLossADDA(nn.Module):

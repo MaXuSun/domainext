@@ -12,7 +12,7 @@ from typing import Optional, Sequence
 import torch
 import torch.nn as nn
 
-from domainext.models.classification.network.grl import GradientReverseLayer
+from domainext.models.classification.grl import GradientReverseLayer
 
 
 __all__ = [

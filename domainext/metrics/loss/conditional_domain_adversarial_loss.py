@@ -17,7 +17,7 @@ import torch.nn as nn
 
 from ..entropy import entropy
 from ..accuracy import binary_accuracy
-from domainext.models.classification.network.grl import WarmStartGradientReverseLayer
+from domainext.models.classification.grl import WarmStartGradientReverseLayer
 
 
 __all__ = ['ConditionalDomainAdversarialLoss']

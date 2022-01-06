@@ -1,4 +1,5 @@
 from torch import nn
+import torch
 from domainext.utils.common.build import build_backbone,build_bottleneck
 
 class BaseNet(nn.Module):
@@ -15,14 +16,29 @@ class BaseNet(nn.Module):
         self.bottleneck = self.build_bottleneck(cfg,model_cfg,**kwargs)
         self.classifier = self.build_classifier(num_classes)
 
+        if self.bottleneck is None:
+            self._embedding_dim = self._fdim
+        else:
+            self._embedding_dim = model_cfg.BOTTLENECK.HIDDEN_LAYERS[-1]
+
     @property
     def fdim(self):
         return self._fdim
     
-    def forward(self,x,return_feature=False):
-        f = self.backbone(x)
-        if self.bottleneck is not None:
-            f = self.bottleneck(f)
+    @property
+    def embedding_dim(self):
+        return self._embedding_dim
+    
+    def forward(self,x,return_feature=False,freeze=False,**kwargs):
+        if freeze:
+            with torch.no_grad():
+                f = self.backbone(x)
+                if self.bottleneck is not None:
+                    f = self.bottleneck(f)
+        else:
+            f = self.backbone(x)
+            if self.bottleneck is not None:
+                f = self.bottleneck(f)
         
         if self.classifier is None:
             return f

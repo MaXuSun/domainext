@@ -4,7 +4,7 @@ import datetime
 from domainext.utils.common import ( MetricMeter, AverageMeter)
 from domainext.utils.common.data import ForeverDataIterator
 
-class TrainerXU(SimpleClassTrainer):
+class ClassTrainerXU(SimpleClassTrainer):
     """A base trainer using both labeled and unlabeled data.
 
     In the context of domain adaptation, labeled and unlabeled data

@@ -424,8 +424,8 @@ class SimpleClassTrainer(TrainerBase):
 
         return results['accuracy']
 
-    def model_inference(self, input):
-            return self.model(input)
+    def model_inference(self, input,return_feature=False,freeze=False):
+        return self.model(input,return_feature=return_feature,freeze=freeze)
 
     def parse_batch_test(self, batch):
         input = batch['img']
