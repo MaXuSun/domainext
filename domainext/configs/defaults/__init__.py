@@ -6,6 +6,7 @@ from .optim import OPTIM
 from .test import TEST
 from .train import TRAIN
 from .trainer import TRAINER
+from .activelearning import ACTIVELEARNING
 
 __all__ = [
     'DATALOADER',
@@ -15,5 +16,6 @@ __all__ = [
     'OPTIM',
     'TEST',
     'TRAIN',
-    'TRAINER'
+    'TRAINER',
+    'ACTIVELEARNING'
 ]

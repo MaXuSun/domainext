@@ -64,7 +64,9 @@ class BADGE(Strategy):
         The deep model to use
     nclasses: int
         Number of unique values for the target
-    args: dict
+    embedding_dim: int
+        The embedding dimensionality of model.
+    kwargs: dict
         Specify additional parameters
         
         - **batch_size**: The batch size used internally for torch.utils.data.DataLoader objects. (int, optional)
@@ -72,8 +74,8 @@ class BADGE(Strategy):
         - **loss**: The loss function to be used in computations. (typing.Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional)
     """
     
-    def __init__(self, wrapper_labeled, wrapper_unlabeled, net, nclasses, **kwargs): #
-        super(BADGE, self).__init__(wrapper_labeled, wrapper_unlabeled, net, nclasses, kwargs)        
+    def __init__(self, wrapper_labeled, wrapper_unlabeled, model, num_classes, embedding_dim, **kwargs):
+        super().__init__(wrapper_labeled, wrapper_unlabeled, model, num_classes, embedding_dim, **kwargs)      
         
     def select(self, budget):
         """
@@ -97,4 +99,4 @@ class BADGE(Strategy):
 
 @STRATEGY_REGISTRY.register()
 def badge(**kwargs):
-     return BADGE(kwargs)
+     return BADGE(**kwargs)

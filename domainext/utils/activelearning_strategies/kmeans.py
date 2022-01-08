@@ -2,6 +2,7 @@ from .strategy import Strategy
 from torch.utils.data import Subset, DataLoader, Dataset
 from numpy import random
 import torch
+from domainext.utils.common.build import STRATEGY_REGISTRY
 
 # Used to calculate embeddings
 class CustomTensorDataset(Dataset):
@@ -15,7 +16,7 @@ class CustomTensorDataset(Dataset):
     def __len__(self):
         return self.wrapped_tensor.shape[0]
 
-class KMeansSampling(Strategy):
+class KMeans(Strategy):
     
     """
     Implements KMeans Sampling selection strategy, the last layer embeddings are calculated for all the unlabeled data points. 
@@ -26,15 +27,17 @@ class KMeansSampling(Strategy):
     
     Parameters
     ----------
-    labeled_dataset: torch.utils.data.Dataset
+    wrapper_labeled: torch.utils.data.Dataset
         The labeled training dataset
-    unlabeled_dataset: torch.utils.data.Dataset
+    wrapper_unlabeled: torch.utils.data.Dataset
         The unlabeled pool dataset
     net: torch.nn.Module
         The deep model to use
     nclasses: int
         Number of unique values for the target
-    args: dict
+    embedding_dim: int
+        The embedding dimensionality of model.
+    kwargs: dict
         Specify additional parameters
         
         - **batch_size**: Batch size to be used inside strategy class (int, optional)
@@ -49,23 +52,24 @@ class KMeansSampling(Strategy):
             - **n_init**: Specifies the number of kmeans run-throughs to use, wherein the one with the smallest inertia is selected for the selection phase (int, optional)
     """
     
-    def __init__(self, labeled_dataset, unlabeled_dataset, net, nclasses, args={}): 
+    # def __init__(self, wrapper_labeled, wrapper_unlabeled, net, nclasses, embedding_dim,**kwargs): 
         
-        super(KMeansSampling, self).__init__(labeled_dataset, unlabeled_dataset, net, nclasses, args)
+    def __init__(self, wrapper_labeled, wrapper_unlabeled, model, num_classes, embedding_dim, **kwargs):
+        super().__init__(wrapper_labeled, wrapper_unlabeled, model, num_classes, embedding_dim, **kwargs)
   
-        if 'rand_seed' in args:
-            random.seed(args['rand_seed'])
+        if 'rand_seed' in kwargs:
+            random.seed(kwargs['rand_seed'])
             
-        if 'representation' in args:
-            self.representation = args['representation']
+        if 'representation' in kwargs:
+            self.representation = kwargs['representation']
         else:
             self.representation = 'linear'
             
-        if 'kmeans_args' in args:
-            self.kmeans_args = args['kmeans_args']
+        if 'kmeans_args' in kwargs:
+            self.kmeans_args = kwargs['kmeans_args']
         else:
-            args['kmeans_args'] = dict()
-            self.kmeans_args = args['kmeans_args']
+            kwargs['kmeans_args'] = dict()
+            self.kmeans_args = kwargs['kmeans_args']
             
         if 'tol' not in self.kmeans_args:
             self.kmeans_args['tol'] = 1e-4
@@ -78,7 +82,7 @@ class KMeansSampling(Strategy):
     
     def get_closest_distances(self, ground_set, center_tensor):
         
-        ground_set_loader = DataLoader(ground_set, batch_size = self.args['batch_size'], shuffle = False)
+        ground_set_loader = DataLoader(ground_set, batch_size = self.kwargs['batch_size'], shuffle = False)
 
         # Store the minimum distances in this tensor    
         ground_set_min_distances = torch.zeros(len(ground_set)).to(self.device)
@@ -113,13 +117,13 @@ class KMeansSampling(Strategy):
     def kmeans_plusplus(self, num_centers):
         
         # 1. Choose a random point to be the center (uniform dist)
-        selected_points = [random.choice(len(self.unlabeled_dataset))]
+        selected_points = [random.choice(len(self.wrapper_unlabeled))]
         
         # Keep repeating this step until num_centers centers have been chosen
         while len(selected_points) < num_centers:
             
             # 2. Calculate the squared distance to the nearest center for each point
-            selected_centers = Subset(self.unlabeled_dataset, selected_points)
+            selected_centers = Subset(self.wrapper_unlabeled, selected_points)
             if self.representation == 'linear':
                 selected_centers_tensor = self.get_embedding(selected_centers)
             elif self.representation == 'raw':
@@ -128,7 +132,7 @@ class KMeansSampling(Strategy):
             else:
                 raise ValueError("Representation must be one of 'linear', 'raw'")
             
-            ground_set_min_distances, _ = self.get_closest_distances(self.unlabeled_dataset, selected_centers_tensor)
+            ground_set_min_distances, _ = self.get_closest_distances(self.wrapper_unlabeled, selected_centers_tensor)
             ground_set_min_distances = torch.pow(ground_set_min_distances, 2)
             
             # 3. Sample a random point with probability proportional to the squared distance
@@ -149,10 +153,10 @@ class KMeansSampling(Strategy):
 
         # Calculate dimensions of and form the storage tensor        
         if self.representation == 'linear':
-            num_features = self.model.get_embedding_dim()
+            num_features = self.embedding_dim
             means = torch.zeros(len(clusters), num_features).to(self.device)     
         elif self.representation == 'raw':
-            num_features = self.unlabeled_dataset[0].view(-1).shape[0]
+            num_features = self.wrapper_unlabeled[0].view(-1).shape[0]
             means = torch.zeros(len(clusters), num_features).to(self.device)
         else:
             raise ValueError("Representation must be one of 'linear', 'raw'")
@@ -161,8 +165,8 @@ class KMeansSampling(Strategy):
         for i, cluster in enumerate(clusters):
             
             # Only load those points specific to the cluster
-            ground_set_cluster = Subset(self.unlabeled_dataset, cluster)
-            ground_set_loader = DataLoader(ground_set_cluster, batch_size = self.args['batch_size'], shuffle = False)
+            ground_set_cluster = Subset(self.wrapper_unlabeled, cluster)
+            ground_set_loader = DataLoader(ground_set_cluster, batch_size = self.kwargs['batch_size'], shuffle = False)
     
             running_cluster_sum = None
     
@@ -190,7 +194,7 @@ class KMeansSampling(Strategy):
     def kmeans_calculate_clusters(self, center_tensor):
         
         # Calculate the closest center indices
-        _, ground_set_closest_center_indices = self.get_closest_distances(self.unlabeled_dataset, center_tensor)
+        _, ground_set_closest_center_indices = self.get_closest_distances(self.wrapper_unlabeled, center_tensor)
         
         # For each center, create an associated cluster and add points to them
         clusters = [[] for x in range(len(center_tensor))]
@@ -210,7 +214,7 @@ class KMeansSampling(Strategy):
         for i in range(self.kmeans_args['n_init']):   
             
             # Use kmeans++ initialization
-            centers_subset = Subset(self.unlabeled_dataset, self.kmeans_plusplus(num_centers))
+            centers_subset = Subset(self.wrapper_unlabeled, self.kmeans_plusplus(num_centers))
             
             if self.representation == "linear":
                 centers = self.get_embedding(centers_subset)
@@ -231,7 +235,7 @@ class KMeansSampling(Strategy):
                     break
 
             # Lastly, evaluate the inertia of this kmeans solution. If it is the best one so far, keep it.
-            ground_set_min_distances, ground_set_closest_center_indices = self.get_closest_distances(self.unlabeled_dataset, centers)
+            ground_set_min_distances, ground_set_closest_center_indices = self.get_closest_distances(self.wrapper_unlabeled, centers)
             inertia = torch.pow(ground_set_min_distances, 2).sum().item()
 
             if best_inertia is None or inertia < best_inertia:
@@ -253,16 +257,16 @@ class KMeansSampling(Strategy):
         Returns
         ----------
         idxs: list
-            List of selected data point indices with respect to unlabeled_dataset
+            List of selected data point indices with respect to wrapper_unlabeled
         """	
         
-        self.model.eval()
+        self.set_model_mode()
         
         # Get the best centers through kmeans clustering
         best_centers = self.kmeans_clustering(budget)
         
         # Choose the point closest to each center.
-        ground_set_min_distances, ground_set_closest_center_indices = self.get_closest_distances(self.unlabeled_dataset, best_centers)
+        ground_set_min_distances, ground_set_closest_center_indices = self.get_closest_distances(self.wrapper_unlabeled, best_centers)
         
         cluster_min_distances = [None for x in range(budget)]
         cluster_min_indices = [None for x in range(budget)]
@@ -274,3 +278,7 @@ class KMeansSampling(Strategy):
 
         # Return the list of indices of points that are closest to the best centers chosen by kmeans
         return cluster_min_indices                
+
+@STRATEGY_REGISTRY.register()
+def kmeans(**kwkwargs):
+    return KMeans(**kwkwargs)

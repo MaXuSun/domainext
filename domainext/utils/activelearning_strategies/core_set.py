@@ -1,5 +1,6 @@
 import torch
 from .strategy import Strategy
+from domainext.utils.common.build import STRATEGY_REGISTRY
 
 class CoreSet(Strategy):
     
@@ -11,9 +12,9 @@ class CoreSet(Strategy):
     
     Parameters
     ----------
-    labeled_dataset: torch.utils.data.Dataset
+    wrapper_labeled: torch.utils.data.Dataset
         The labeled training dataset
-    unlabeled_dataset: torch.utils.data.Dataset
+    wrapper_unlabeled: torch.utils.data.Dataset
         The unlabeled pool dataset
     net: torch.nn.Module
         The deep model to use
@@ -27,9 +28,9 @@ class CoreSet(Strategy):
         - **loss**: The loss function to be used in computations. (typing.Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional)
     """
     
-    def __init__(self, labeled_dataset, unlabeled_dataset, net, nclasses, args={}):
+    def __init__(self, wrapper_labeled, wrapper_unlabeled, net, nclasses, args={}):
         
-        super(CoreSet, self).__init__(labeled_dataset, unlabeled_dataset, net, nclasses, args)
+        super(CoreSet, self).__init__(wrapper_labeled, wrapper_unlabeled, net, nclasses, args)
   
     def furthest_first(self, unlabeled_embeddings, labeled_embeddings, n):
         
@@ -66,13 +67,17 @@ class CoreSet(Strategy):
         Returns
         ----------
         idxs: list
-            List of selected data point indices with respect to unlabeled_dataset
+            List of selected data point indices with respect to wrapper_unlabeled
         """	
         
         
         self.set_model_mode()
-        embedding_unlabeled = self.get_embedding(self.unlabeled_dataset)
-        embedding_labeled = self.get_embedding(self.labeled_dataset)
+        embedding_unlabeled = self.get_embedding(self.wrapper_unlabeled)
+        embedding_labeled = self.get_embedding(self.wrapper_labeled)
         chosen = self.furthest_first(embedding_unlabeled, embedding_labeled, budget)
 
         return chosen        
+
+@STRATEGY_REGISTRY.register()
+def coreset(**kwargs):
+    return CoreSet(**kwargs)

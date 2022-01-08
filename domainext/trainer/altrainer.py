@@ -1,4 +1,5 @@
 import numpy as np
+from torch import embedding
 
 import torch.nn.functional as F
 from .xutrainer import ClassTrainerXU
@@ -38,6 +39,7 @@ class ALClassTrainer(ClassTrainerXU):
             wrapper_unlabeled = self.datawrappers['wrapper_u'],
             net = self.model,
             nclass = self.num_classes,
+            embedding_dim = self.model.embedding_dim,
             inference_func = self.model_inference,
             device = self.device,
             batch_size=cfg.DATALOADER.TRAIN_X.BATCH_SIZE,

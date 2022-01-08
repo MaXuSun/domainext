@@ -4,7 +4,7 @@ from torch.utils.data import DataLoader
 from domainext.data.loader import fast_build_test_loader
 
 class Strategy:
-    def __init__(self, wrapper_labeled, wrapper_unlabeled, model, num_classes, args={}):
+    def __init__(self, wrapper_labeled, wrapper_unlabeled, model, num_classes,embedding_dim,**kwargs):
         """ The query strategies for selecting samples for Active Learning
 
         Args:
@@ -12,6 +12,7 @@ class Strategy:
             wrapper_unlabeled ([Pytorch Dataset]): The unlabeled pytorch dataset.
             model ([Module or dict[str:Module]]): The model for strategies, which can be a nn.Moudle or a dict composed of nn.Module. 
             num_classes ([int]): The number of categories.
+            embedding_dim ([int]): The embedding dimensionality of model.
             args[dict]: Stroe some optinal parameters.
                 inference_func[function]: A customized model inference function, which default value is 'return model(input)'
                 batch_size[int]: Batch size, which default value is 1.
@@ -23,25 +24,26 @@ class Strategy:
         self.wrapper_unlabeled = wrapper_unlabeled
         self.model = model
         self.target_classes = num_classes
-        self.args = args
+        self.embedding_dim = embedding_dim
+        self.kwargs = kwargs
 
-        if 'inference_func' not in args and args['inference_func'] is not None:
+        if 'inference_func' not in kwargs and kwargs['inference_func'] is not None:
             self.inference_func = self.model_inference
         else:
-            self.inference_func = args['inference_func']
+            self.inference_func = kwargs['inference_func']
 
-        if 'batch_size' not in args:
-            args['batch_size'] = 1
+        if 'batch_size' not in kwargs:
+            kwargs['batch_size'] = 1
 
-        if 'device' not in args:
+        if 'device' not in kwargs:
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         else:
-            self.device = args['device']
+            self.device = kwargs['device']
 
-        if 'loss_func' not in args:
+        if 'loss_func' not in kwargs:
             self.loss = F.cross_entropy
         else:
-            self.loss = args['loss_func']
+            self.loss = kwargs['loss_func']
 
     def select(self, budget):
         raise NotImplemented
@@ -197,13 +199,13 @@ class Strategy:
 
         return probs
 
-    def get_embedding(self, to_predict_wrapper, embedding_dim):
+    def get_embedding(self, to_predict_wrapper):
 
         # Ensure model is on right device and is in eval. mode
         self.set_model_mode('eval')
 
         # Create a tensor to hold embeddings
-        embedding = torch.zeros([len(to_predict_wrapper), embedding_dim]).to(self.device)
+        embedding = torch.zeros([len(to_predict_wrapper), self.embedding_dim]).to(self.device)
 
         # Create a dataloader object to load the dataset
         to_predict_dataloader = fast_build_test_loader(to_predict_wrapper)
@@ -228,7 +230,7 @@ class Strategy:
 
     # gradient embedding (assumes cross-entropy loss)
     # calculating hypothesised labels within
-    def get_grad_embedding(self, to_predict_wrapper, predict_labels, embedding_dim, grad_embedding_type="bias_linear"):
+    def get_grad_embedding(self, to_predict_wrapper, predict_labels, grad_embedding_type="bias_linear"):
         self.set_model_mode('train')
 
         # Create the tensor to return depending on the grad_embedding_type, which can have bias only,
@@ -236,14 +238,14 @@ class Strategy:
         if grad_embedding_type == "bias":
             grad_embedding = torch.zeros([len(to_predict_wrapper), self.target_classes]).to(self.device)
         elif grad_embedding_type == "linear":
-            grad_embedding = torch.zeros([len(to_predict_wrapper), embedding_dim * self.target_classes]).to(self.device)
+            grad_embedding = torch.zeros([len(to_predict_wrapper), self.embedding_dim * self.target_classes]).to(self.device)
         elif grad_embedding_type == "bias_linear":
-            grad_embedding = torch.zeros([len(to_predict_wrapper), (embedding_dim + 1) * self.target_classes]).to(self.device)
+            grad_embedding = torch.zeros([len(to_predict_wrapper), (self.embedding_dim + 1) * self.target_classes]).to(self.device)
         else:
             raise ValueError("Grad embedding type not supported: Pick one of 'bias', 'linear', or 'bias_linear'")
 
         # Create a dataloader object to load the dataset
-        to_predict_dataloader = fast_build_test_loader(to_predict_wrapper, bs=self.args['batch_size'])
+        to_predict_dataloader = fast_build_test_loader(to_predict_wrapper, bs=self.kwargs['batch_size'])
 
         evaluated_instances = 0
 
