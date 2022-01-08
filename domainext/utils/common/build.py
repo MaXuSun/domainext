@@ -14,7 +14,8 @@ __all__ = [
     'build_decoder',
     'build_trainer',
     'build_evaluator',
-    'build_dataset'
+    'build_dataset',
+    'build_strategy'
 ]
 
 ##################
@@ -98,12 +99,24 @@ def build_evaluator(cfg, **kwargs):
 
 """Dataset Registry"""
 DATASET_REGISTRY = Registry("DATASET")
-def build_dataset(cfg,show_data=False):
+def build_dataset(cfg,show_datainfo=False):
     avai_datasets = DATASET_REGISTRY.registered_names()
     check_availability(cfg.DATASET.NAME, avai_datasets)
     if cfg.VERBOSE:
         print("Loading dataset: {}".format(cfg.DATASET.NAME))
     dataset = DATASET_REGISTRY.get(cfg.DATASET.NAME)(cfg)
-    if show_data:
+    if show_datainfo:
         show_dataset_summary(cfg,dataset)
     return dataset
+
+
+#########################
+### 4. active learning strategy   #
+#########################
+STRATEGY_REGISTRY = Registry('STRATEGY')
+def build_strategy(cfg,**kwags):
+    avai_strategy = STRATEGY_REGISTRY.registered_names()
+    check_availability(cfg.ACTIVELEARNING.STRATEGY_NAME,avai_strategy)
+    if cfg.VERBOSE:
+        print('Loading strategy: {}'.format(cfg.ACTIVELEARNING.STRATEGY_NAME))
+    return STRATEGY_REGISTRY.get(cfg.ACTIVELEARNING.STRATEGY_NAME)(**kwags)

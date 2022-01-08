@@ -136,27 +136,27 @@ class DatasetBase:
 
         print("File extracted to {}".format(osp.dirname(dst)))
 
-    def _add_item(self,item,name='train_x',record=False):
+    def add_item(self,item,name='train_x',record=False):
         if record:
             print('Add item: ',item)
         getattr(self,name).append(item)
     
-    def _add_items(self,items,name='train_x',record=True):
+    def add_items(self,items,name='train_x',record=True):
         if record:
             for item in items:
                 print('Add item: ',item)
         getattr(self,name).extend(items)
     
-    def _remove_item(self,item,name='train_x',record=True):
+    def remove_item(self,item,name='train_x',record=True):
         if record:
             print('Remove item: ',item)
         getattr(self,name).remove(item)
     
-    def _remove_items(self,items,name='train_x',record=False):
+    def remove_items(self,items,name='train_x',record=False):
         for item in items:
             self._remove_item(item,name,record)
     
-    def _set_data(self,newdata,name):
+    def set_data(self,newdata,name):
         setattr(self,name,newdata)
 
     def _read_json_xu(self):
