@@ -1,8 +1,7 @@
 import numpy as np
-from torch import embedding
 
 import torch.nn.functional as F
-from .xutrainer import ClassTrainerXU
+from .xutrainer import ClassTrainerXU,SegTrainerXU
 from domainext.utils.common import build_strategy
 
 def cal_num_active(cfg,epoch,update_epochs,dataset):
@@ -74,4 +73,5 @@ class ALClassTrainer(ClassTrainerXU):
         super().after_epoch()
         self.active_learning()
 
-
+class ALSegTrainer(SegTrainerXU):
+    pass

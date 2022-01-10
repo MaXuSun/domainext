@@ -280,7 +280,7 @@ Residual networks with mixstyle
 
 @BACKBONE_REGISTRY.register()
 def resnet18_ms_l123(pretrained=True, **kwargs):
-    from dassl.modeling.ops import MixStyle
+    from domainext.models.ops import MixStyle
 
     model = ResNet(
         block=BasicBlock,
@@ -297,7 +297,7 @@ def resnet18_ms_l123(pretrained=True, **kwargs):
 
 @BACKBONE_REGISTRY.register()
 def resnet18_ms_l12(pretrained=True, **kwargs):
-    from dassl.modeling.ops import MixStyle
+    from domainext.models.ops import MixStyle
 
     model = ResNet(
         block=BasicBlock,
@@ -314,7 +314,7 @@ def resnet18_ms_l12(pretrained=True, **kwargs):
 
 @BACKBONE_REGISTRY.register()
 def resnet18_ms_l1(pretrained=True, **kwargs):
-    from dassl.modeling.ops import MixStyle
+    from domainext.models.ops import MixStyle
 
     model = ResNet(
         block=BasicBlock,
@@ -331,7 +331,7 @@ def resnet18_ms_l1(pretrained=True, **kwargs):
 
 @BACKBONE_REGISTRY.register()
 def resnet50_ms_l123(pretrained=True, **kwargs):
-    from dassl.modeling.ops import MixStyle
+    from domainext.models.ops import MixStyle
 
     model = ResNet(
         block=Bottleneck,
@@ -348,7 +348,7 @@ def resnet50_ms_l123(pretrained=True, **kwargs):
 
 @BACKBONE_REGISTRY.register()
 def resnet50_ms_l12(pretrained=True, **kwargs):
-    from dassl.modeling.ops import MixStyle
+    from domainext.models.ops import MixStyle
 
     model = ResNet(
         block=Bottleneck,
@@ -365,7 +365,7 @@ def resnet50_ms_l12(pretrained=True, **kwargs):
 
 @BACKBONE_REGISTRY.register()
 def resnet50_ms_l1(pretrained=True, **kwargs):
-    from dassl.modeling.ops import MixStyle
+    from domainext.models.ops import MixStyle
 
     model = ResNet(
         block=Bottleneck,
@@ -382,7 +382,7 @@ def resnet50_ms_l1(pretrained=True, **kwargs):
 
 @BACKBONE_REGISTRY.register()
 def resnet101_ms_l123(pretrained=True, **kwargs):
-    from dassl.modeling.ops import MixStyle
+    from domainext.models.ops import MixStyle
 
     model = ResNet(
         block=Bottleneck,
@@ -399,7 +399,7 @@ def resnet101_ms_l123(pretrained=True, **kwargs):
 
 @BACKBONE_REGISTRY.register()
 def resnet101_ms_l12(pretrained=True, **kwargs):
-    from dassl.modeling.ops import MixStyle
+    from domainext.models.ops import MixStyle
 
     model = ResNet(
         block=Bottleneck,
@@ -416,7 +416,7 @@ def resnet101_ms_l12(pretrained=True, **kwargs):
 
 @BACKBONE_REGISTRY.register()
 def resnet101_ms_l1(pretrained=True, **kwargs):
-    from dassl.modeling.ops import MixStyle
+    from domainext.models.ops import MixStyle
 
     model = ResNet(
         block=Bottleneck,

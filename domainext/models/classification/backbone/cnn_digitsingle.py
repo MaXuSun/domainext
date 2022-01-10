@@ -5,7 +5,7 @@ https://github.com/ricvolpi/generalize-unseen-domains/blob/master/model.py
 import torch.nn as nn
 from torch.nn import functional as F
 
-from dassl.utils import init_network_weights
+from domainext.utils import init_network_weights
 
 from domainext.utils.common.build import BACKBONE_REGISTRY
 from .backbone import Backbone

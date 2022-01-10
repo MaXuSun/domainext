@@ -72,6 +72,5 @@ class ClassTrainerX(SimpleClassTrainer):
 
         return input, label, domain
 
-
 class SegTrainerX(SimpleSegTrainer):
     pass

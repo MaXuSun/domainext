@@ -93,5 +93,5 @@ class ClassTrainerXU(SimpleClassTrainer):
 
         return input_x, label_x, input_u
 
-class SegTrainerX(SimpleSegTrainer):
+class SegTrainerXU(SimpleSegTrainer):
     pass
